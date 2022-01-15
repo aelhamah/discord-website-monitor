@@ -12,7 +12,7 @@ from urllib.request import urlopen, Request
 client = discord.Client()
 
 # monitor eecs280.org for changes
-url = Request('https://eecs280staff.github.io/eecs280.org/',
+url = Request('https://aelhamah.github.io/test/',
         headers={'User-Agent': 'Mozilla/5.0'})
 
 @client.event
