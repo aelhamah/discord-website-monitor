@@ -73,7 +73,7 @@ async def on_ready():
             embedVar.add_field(name=item["title"], value=item["description"], inline=False) 
             
 		      # send the message
-          channel = client.get_channel(928080755987456010)
+          channel = client.get_channel(921807905508978730)
           await channel.send("@remind \n", embed=embedVar) 
           
 		      # wait
