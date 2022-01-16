@@ -3,7 +3,6 @@ import discord
 import os
 from bs4 import BeautifulSoup
 import hashlib
-from keep_alive import keep_alive
 from markdownify import markdownify
 import time
 from urllib.request import urlopen, Request
@@ -84,6 +83,5 @@ async def on_ready():
         print(e)
         print("error")
 
-keep_alive()
 client.run(os.environ['TOKEN'])
 
