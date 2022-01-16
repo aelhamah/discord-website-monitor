@@ -75,7 +75,7 @@ async def on_ready():
           channel = client.get_channel(928080755987456010)
           await channel.send("@remind \n", embed=embedVar) 
           
-		  # wait
+		      # wait
           time.sleep(10)
           continue
           
