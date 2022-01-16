@@ -43,16 +43,19 @@ async def on_ready():
         if newHash == currentHash:
           continue
 
-        # if something changed in the hashes
+        # something changed in the hashes
         else:
           # notify
           print("something changed")
 
           # reset the current hash
-          currentHash = newHash
+          response = urlopen(url).read()
+          soup = BeautifulSoup(response, 'html.parser')
+          html = soup.find('div', id='announcements')
+          currentHash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
           
 		      # begin the embedded message
-          embedVar = embedVar = discord.Embed(title="Course Updates", description="", color=0xE62C2D)
+          embedVar = discord.Embed(title="Course Updates", description="", color=0xE62C2D)
 
 		      # parse the announcements
           fields = []
