@@ -23,7 +23,7 @@ async def on_ready():
     current_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
     while True:
       time.sleep(60)
-      print("checking")
+      print("checking ... time:" + time.asctime(time.localtime()))
 
       # get the new hash 
       response = urlopen(url).read()
