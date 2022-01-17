@@ -22,7 +22,7 @@ async def on_ready():
     html = soup.find('div', id='announcements')
     current_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
     while True:
-      time.sleep(10)
+      time.sleep(60)
       print("checking")
 
       # get the new hash 
