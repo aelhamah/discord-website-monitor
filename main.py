@@ -1,56 +1,66 @@
 # Importing libraries
-import time
+import discord
+import os
+from bs4 import BeautifulSoup
 import hashlib
+from markdownify import markdownify
+import time
 from urllib.request import urlopen, Request
 
-# setting the URL you want to monitor
-url = Request('https://leetcode.com/',
-			headers={'User-Agent': 'Mozilla/5.0'})
+client = discord.Client()
 
-# to perform a GET request and load the
-# content of the website and store it in a var
-response = urlopen(url).read()
+# monitor eecs280.org for changes
+url = Request('https://eecs280staff.github.io/eecs280.org/',
+        headers={'User-Agent': 'Mozilla/5.0'})
 
-# to create the initial hash
-currentHash = hashlib.sha224(response).hexdigest()
-print("running")
-time.sleep(10)
-while True:
-	try:
-		# perform the get request and store it in a var
-		response = urlopen(url).read()
-		
-		# create a hash
-		currentHash = hashlib.sha224(response).hexdigest()
-		
-		# wait for 30 seconds
-		time.sleep(30)
-		
-		# perform the get request
-		response = urlopen(url).read()
-		
-		# create a new hash
-		newHash = hashlib.sha224(response).hexdigest()
+@client.event
+async def on_ready():
+    print('Logged in as ' + client.user.name)
 
-		# check if new hash is same as the previous hash
-		if newHash == currentHash:
-			continue
+    response = urlopen(url).read()
+    soup = BeautifulSoup(response, 'html.parser')
+    html = soup.find('div', id='announcements')
+    current_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
+    while True:
+      time.sleep(10)
+      print("checking")
 
-		# if something changed in the hashes
-		else:
-			# notify
-			print("something changed")
+      # get the new hash 
+      response = urlopen(url).read()
+      soup = BeautifulSoup(response, 'html.parser')
+      html = soup.find('div', id='announcements')
+      new_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
 
-			# again read the website
-			response = urlopen(url).read()
+      if current_hash != new_hash:
+        print("something changed")
+        await send_message(html)
+        current_hash = new_hash
 
-			# create a hash
-			currentHash = hashlib.sha224(response).hexdigest()
 
-			# wait for 30 seconds
-			time.sleep(30)
-			continue
-			
-	# To handle exceptions
-	except Exception as e:
-		print("error")
+async def send_message(html):
+  # begin the embedded message
+  embedVar = discord.Embed(title="Course Updates", description="", color=0xE62C2D)
+
+  # parse the announcements
+  fields = []
+  for child in html.contents:
+    if not isinstance(child, str):
+      if child.has_attr('class'):
+        if 'header' in child['class']:
+            fields.append({
+                "title": child.text.strip('\n').strip(),
+                "description": "",
+            })
+        else:
+          fields[-1]["description"] += markdownify(str(child))
+      else:
+          fields[-1]["description"] += markdownify(str(child))
+  
+  for item in fields:
+    embedVar.add_field(name=item["title"], value=item["description"], inline=False) 
+    
+  # send the message
+  channel = client.get_channel(928080755987456010)
+  await channel.send("@remind \n", embed=embedVar)  
+
+client.run(os.environ['TOKEN'])
