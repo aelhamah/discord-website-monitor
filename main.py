@@ -1,11 +1,14 @@
 # Importing libraries
-import discord
-import os
 from bs4 import BeautifulSoup
+import discord
 import hashlib
 from markdownify import markdownify
+import os
+import random
 import time
 from urllib.request import urlopen, Request
+import requests
+
 
 client = discord.Client()
 
@@ -22,6 +25,8 @@ async def on_ready():
     html = soup.find('div', id='announcements')
     current_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
     while True:
+      requests.post("https://us-east-1.aws.data.mongodb-api.com/app/discord-bot-logs-sgugo/endpoint/log")
+
       time.sleep(60)
       print("checking ... time:" + time.asctime(time.localtime()))
 
@@ -39,28 +44,24 @@ async def on_ready():
 
 async def send_message(html):
   # begin the embedded message
-  embedVar = discord.Embed(title="Course Updates", description="", color=0xE62C2D)
-
-  # parse the announcements
-  fields = []
+  embedVars = []
   for child in html.contents:
     if not isinstance(child, str):
       if child.has_attr('class'):
         if 'header' in child['class']:
-            fields.append({
-                "title": child.text.strip('\n').strip(),
-                "description": "",
-            })
+          # begin the embedded message
+          embedVars.append(discord.Embed(title=child.text.strip('\n').strip(), description="", color=int(random.random()*16777215)))
         else:
-          fields[-1]["description"] += markdownify(str(child))
+          embedVars[-1].description += markdownify(str(child))
       else:
-          fields[-1]["description"] += markdownify(str(child))
-  
-  for item in fields:
-    embedVar.add_field(name=item["title"], value=item["description"], inline=False) 
+          embedVars[-1].description += markdownify(str(child))
     
   # send the message
   channel = client.get_channel(928080755987456010)
-  await channel.send("@remind \n", embed=embedVar)  
+  if len(embedVars) > 0:
+    await channel.send("@remind \n")
+  for embedVar in embedVars:
+    time.sleep(1)
+    await channel.send(embed=embedVar)    
 
 client.run(os.environ['TOKEN'])
