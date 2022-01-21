@@ -13,8 +13,7 @@ import requests
 client = discord.Client()
 
 # monitor eecs280.org for changes
-url = Request('https://eecs280staff.github.io/eecs280.org/',
-        headers={'User-Agent': 'Mozilla/5.0'})
+url = Request('https://eecs280staff.github.io/eecs280.org/', headers={'User-Agent': 'Mozilla/5.0'})
 
 @client.event
 async def on_ready():
@@ -25,21 +24,24 @@ async def on_ready():
     html = soup.find('div', id='announcements')
     current_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
     while True:
-      requests.post("https://us-east-1.aws.data.mongodb-api.com/app/discord-bot-logs-sgugo/endpoint/log")
+      try:
+        time.sleep(60)
+        print("checking ... time:" + time.asctime(time.localtime()))
 
-      time.sleep(60)
-      print("checking ... time:" + time.asctime(time.localtime()))
+        # get the new hash 
+        response = urlopen(url).read()
+        soup = BeautifulSoup(response, 'html.parser')
+        html = soup.find('div', id='announcements')
+        new_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
 
-      # get the new hash 
-      response = urlopen(url).read()
-      soup = BeautifulSoup(response, 'html.parser')
-      html = soup.find('div', id='announcements')
-      new_hash = hashlib.sha224(str(html).encode('utf-8')).hexdigest()
+        if current_hash != new_hash:
+          print("something changed")
+          await send_message(html)
+          current_hash = new_hash
 
-      if current_hash != new_hash:
-        print("something changed")
-        await send_message(html)
-        current_hash = new_hash
+      except Exception as e:
+        print("logging error ... ")
+        requests.post(os.environ['LOG_URL'], json={'message': str(e)})
 
 
 async def send_message(html):
