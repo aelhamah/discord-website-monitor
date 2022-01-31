@@ -59,9 +59,10 @@ async def send_message(html):
           embedVars[-1].description += markdownify(str(child))
     
   # send the message
-  channel = client.get_channel(928080755987456010)
+  channel = client.get_channel(os.environ['CHANNEL_ID'])
   if len(embedVars) > 0:
-    await channel.send("@remind \n")
+    # mention the remind role
+    await channel.send("<@&{}>\n".format(os.environ['ROLE_ID']))
   for embedVar in embedVars:
     time.sleep(1)
     await channel.send(embed=embedVar)    
