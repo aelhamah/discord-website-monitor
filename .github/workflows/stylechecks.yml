@@ -1,4 +1,4 @@
-name: HTML Validation
+name: Style Checks
 
 on:
   pull_request:
