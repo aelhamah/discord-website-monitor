@@ -1,0 +1,7 @@
+#!/bin/bash
+# stylecheck
+
+set -Eeuo pipefail
+
+pydocstyle main.py
+black main.py

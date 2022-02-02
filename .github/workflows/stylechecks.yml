@@ -1,0 +1,27 @@
+name: HTML Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-style:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install pydocstyle black
+          sudo chmod +x bin/*
+
+      - name: Run tests
+        run: ./bin/stylecheck
