@@ -31,13 +31,13 @@ async def on_ready():
     response = urlopen(url).read()
     soup = BeautifulSoup(response, "html.parser")
     html = soup.select(".ui.message.info")
-    # # hash each element in html and add it to elements
-    # for element in html:
-    #     elements.append(hashlib.sha224(str(element).encode("utf-8")).hexdigest())
+    # hash each element in html and add it to elements
+    for element in html:
+        elements.append(hashlib.sha224(str(element).encode("utf-8")).hexdigest())
 
     while True:
         try:
-            time.sleep(2)
+            time.sleep(60)
             print("checking ... time:" + time.asctime(time.localtime()))
 
             # get the new hash
