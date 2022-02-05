@@ -31,13 +31,13 @@ async def on_ready():
     response = urlopen(url).read()
     soup = BeautifulSoup(response, "html.parser")
     html = soup.select(".ui.message.info")
-    # hash each element in html and add it to elements
-    for element in html:
-        elements.append(hashlib.sha224(str(element).encode("utf-8")).hexdigest())
+    # # hash each element in html and add it to elements
+    # for element in html:
+    #     elements.append(hashlib.sha224(str(element).encode("utf-8")).hexdigest())
 
     while True:
         try:
-            time.sleep(60)
+            time.sleep(2)
             print("checking ... time:" + time.asctime(time.localtime()))
 
             # get the new hash
@@ -56,6 +56,19 @@ async def on_ready():
         except Exception as e:
             print("logging error ... ")
             requests.post(os.environ["LOG_URL"], json={"message": str(e)})
+
+
+def reparse_for_internal_links(embedvar):
+    """Replace internal links with markdown links."""
+    desc = embedvar.description.split(" ")
+    for i, _ in enumerate(desc):
+        # search for markdown links using re where anyt
+        if "](#" in desc[i]:
+            # add https://eecs280staff.github.io/eecs280.org/ to the link
+            desc[i] = desc[i].replace(
+                "](#", "](https://eecs280staff.github.io/eecs280.org/#"
+            )
+    embedvar.description = " ".join(desc)
 
 
 async def send_message(html):
@@ -92,6 +105,7 @@ async def send_message(html):
         )
     for embedVar in embedVars:
         time.sleep(1)
+        reparse_for_internal_links(embedVar)
         await channel.send(embed=embedVar)
 
 
